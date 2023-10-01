@@ -1,55 +1,59 @@
 version: '3.5'
 
 services:
+  # Pi-hole Service Configuration
   pihole:
-    container_name: piholeM
-    image: pihole/pihole:latest
+    container_name: piholeM  # Name of the container
+    image: pihole/pihole:latest  # Latest Pi-hole image
     ports:
-      - "53:53/tcp"
-      - "53:53/udp"
-      - "80:80/tcp"
+      - "53:53/tcp"  # DNS TCP port
+      - "53:53/udp"  # DNS UDP port
+      - "80:80/tcp"  # Web Interface port
     environment:
-      TZ: ${TZ}
-      WEBPASSWORD: ${PIHOLE_WEBPASSWORD}
+      TZ: ${TZ}  # Timezone
+      WEBPASSWORD: ${PIHOLE_WEBPASSWORD}  # Password for web interface
     volumes:
-      - './etc-pihole:/etc/pihole'
-      - './etc-dnsmasq.d:/etc/dnsmasq.d'
+      - './etc-pihole:/etc/pihole'  # Pi-hole configuration directory
+      - './etc-dnsmasq.d:/etc/dnsmasq.d'  # dnsmasq configuration directory
     cap_add:
-      - NET_ADMIN
-    restart: unless-stopped
+      - NET_ADMIN  # Necessary for network management
+    restart: unless-stopped  # Restart policy
 
+  # Transmission with OpenVPN Service Configuration
   transmission-openvpn:
     cap_add:
-      - NET_ADMIN
+      - NET_ADMIN  # Necessary for network management
     volumes:
-      - '/path/to/Torrent-complete:/data'
-      - '/path/to/Transmission/vpn:/config'
+      - '/path/to/Torrent-complete:/data'  # Completed torrents directory
+      - '/path/to/Transmission/vpn:/config'  # OpenVPN configuration directory
     environment:
-      - OPENVPN_PROVIDER=${OPENVPN_PROVIDER}
-      - GITHUB_CONFIG_SOURCE_REPO=${GITHUB_CONFIG_SOURCE_REPO}
-      - OPENVPN_CONFIG=${OPENVPN_CONFIG}
-      - OPENVPN_USERNAME=${OPENVPN_USERNAME}
-      - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
-      - TRANSMISSION_WEB_UI=${TRANSMISSION_WEB_UI}
-      - LOCAL_NETWORK=${LOCAL_NETWORK}
+      - OPENVPN_PROVIDER=${OPENVPN_PROVIDER}  # VPN provider
+      - GITHUB_CONFIG_SOURCE_REPO=${GITHUB_CONFIG_SOURCE_REPO}  # GitHub repo for configuration
+      - OPENVPN_CONFIG=${OPENVPN_CONFIG}  # OpenVPN configuration file
+      - OPENVPN_USERNAME=${OPENVPN_USERNAME}  # VPN Username
+      - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}  # VPN Password
+      - TRANSMISSION_WEB_UI=${TRANSMISSION_WEB_UI}  # Web UI for Transmission
+      - LOCAL_NETWORK=${LOCAL_NETWORK}  # Local network address range
     logging:
-      driver: json-file
+      driver: json-file  # Logging driver
       options:
-        max-size: 10m
+        max-size: 10m  # Max log size
     ports:
-      - '9091:9091'
-    image: haugene/transmission-openvpn
+      - '9091:9091'  # Web UI port
+    image: haugene/transmission-openvpn  # Docker image for Transmission with OpenVPN
 
+  # Jellyfin Service Configuration
   jellyfin:
-    image: jellyfin/jellyfin
-    container_name: jellyfinM
-    network_mode: 'host'
+    image: jellyfin/jellyfin  # Jellyfin image
+    container_name: jellyfinM  # Name of the container
+    network_mode: 'host'  # Use host networking
     volumes:
-      - '/path/to/JellyFin:/config'
-      - '/path/to/JellyFin:/cache'
-      - '/path/to/media:/media'
-    restart: 'unless-stopped'
+      - '/path/to/JellyFin:/config'  # Configuration directory
+      - '/path/to/JellyFin:/cache'  # Cache directory
+      - '/path/to/media:/media'  # Media directory
+    restart: 'unless-stopped'  # Restart policy
     environment:
-      - JELLYFIN_PublishedServerUrl=${JELLYFIN_PUBLISHED_SERVER_URL}
+      - JELLYFIN_PublishedServerUrl=${JELLYFIN_PUBLISHED_SERVER_URL}  # Published Server URL
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - "host.docker.internal:host-gateway"  # Mapping host.docker.internal to host gateway
+
