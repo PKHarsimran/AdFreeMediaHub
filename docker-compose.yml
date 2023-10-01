@@ -1,0 +1,55 @@
+version: '3.5'
+
+services:
+  pihole:
+    container_name: piholeM
+    image: pihole/pihole:latest
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "80:80/tcp"
+    environment:
+      TZ: ${TZ}
+      WEBPASSWORD: ${PIHOLE_WEBPASSWORD}
+    volumes:
+      - './etc-pihole:/etc/pihole'
+      - './etc-dnsmasq.d:/etc/dnsmasq.d'
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+
+  transmission-openvpn:
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - '/path/to/Torrent-complete:/data'
+      - '/path/to/Transmission/vpn:/config'
+    environment:
+      - OPENVPN_PROVIDER=${OPENVPN_PROVIDER}
+      - GITHUB_CONFIG_SOURCE_REPO=${GITHUB_CONFIG_SOURCE_REPO}
+      - OPENVPN_CONFIG=${OPENVPN_CONFIG}
+      - OPENVPN_USERNAME=${OPENVPN_USERNAME}
+      - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
+      - TRANSMISSION_WEB_UI=${TRANSMISSION_WEB_UI}
+      - LOCAL_NETWORK=${LOCAL_NETWORK}
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    ports:
+      - '9091:9091'
+    image: haugene/transmission-openvpn
+
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfinM
+    network_mode: 'host'
+    volumes:
+      - '/path/to/JellyFin:/config'
+      - '/path/to/JellyFin:/cache'
+      - '/path/to/media:/media'
+    restart: 'unless-stopped'
+    environment:
+      - JELLYFIN_PublishedServerUrl=${JELLYFIN_PUBLISHED_SERVER_URL}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
